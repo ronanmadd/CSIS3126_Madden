@@ -5,6 +5,9 @@ from PySide6.QtWidgets import QApplication, QWidget, QLineEdit, QPushButton, QLa
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QPixmap
 
+import requests
+from validation import run_validators
+
 from base_window import BaseWindow
 from app_globals import APP_PNG_PATH
 
@@ -80,28 +83,27 @@ class RegisterWindow(BaseWindow):
         # (CONT 2.) You don't need to access the labels outside of the __init__ method
         self.lineEdits['Username'] = QLineEdit()
         self.lineEdits['Password'] = QLineEdit()
-        # Streamline variables
-        usernameEdit = self.lineEdits['Username']
-        passwordEdit = self.lineEdits['Password']
 
         # Make it so the input boxes can stretch horizontally if window grows (not vertically)
-        usernameEdit.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
-        passwordEdit.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
+        self.lineEdits['Username'].setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
+        self.lineEdits['Password'].setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
 
-        passwordEdit.setEchoMode(QLineEdit.EchoMode.Password) # Make it so the password is hidden while the user enters it
+        self.lineEdits['Password'].setEchoMode(QLineEdit.EchoMode.Password) # Make it so the password is hidden while the user enters it
 
         # layout.addWidget(widget, row, column, rowSpan, columnSpan)
         # The 0's mean first row and first column and the 1's mean they occupy one row/column respectively
         gridLayout.addWidget(usernameLabel, 0, 0, 1, 1)
-        gridLayout.addWidget(usernameEdit, 0, 1, 1, 3) # Set column span to 3 to lengthen
+        gridLayout.addWidget(self.lineEdits['Username'], 0, 1, 1, 3) # Set column span to 3 to lengthen
         gridLayout.addWidget(passwordLabel, 1, 0, 1, 1)
-        gridLayout.addWidget(passwordEdit, 1, 1, 1, 3) # Set column span to 3 to lengthen
+        gridLayout.addWidget(self.lineEdits['Password'], 1, 1, 1, 3) # Set column span to 3 to lengthen
 
         # Add a Register button with fixed size policy so it doesn't stretch with the page
         button_register = QPushButton('&Register')
         button_register.setFixedWidth(120)
         button_register.setSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed)
         gridLayout.addWidget(button_register, 2, 3, 1, 1)
+
+        button_register.clicked.connect(self.run_validation) # When button clicked, run validation
 
         # QLabel that looks like hyperlink for going to login window
         labels['loginLink'] = QLabel('<a href="#">Already have an account? Click here to login</a>')
@@ -117,8 +119,27 @@ class RegisterWindow(BaseWindow):
 
         # Styling for potential later error messages and such
         self.status = QLabel('')
-        self.status.setStyleSheet('font-size: 25px; color: red;')
-        gridLayout.addWidget(self.status)
+        self.status.setWordWrap(True)                                               # If text too long for one line, break into mutliple automatically
+        self.status.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Preferred)
+        self.status.setStyleSheet('font-size: 15px; color: red;')
+        mainLayout.addWidget(self.status)
+
+        # Adapter function called by register button to call validation function
+    def run_validation(self):
+
+        usernameEdit = self.lineEdits['Username'] # Had to get rid of the usernameEdit/passwordEdit variables in __init__ 
+        passwordEdit = self.lineEdits['Password'] # (CONT.) because already store the QLineEdit objects in self.lineEdits
+
+        errors = run_validators(usernameEdit, passwordEdit) # Call function
+
+        if errors:
+            self.status.setText("\n".join(errors)) # Join errors if they exist with line break between
+            return
+        
+        else:
+
+            self.status.setText("Validation passed!")
+            # self.send_register_request()
 
     # Function for opening login window
     def open_login_window(self):

@@ -21,7 +21,7 @@ class Controller:
         self.windows[name].raise_()          # Bring window to front (raise is a Python keyword so need _ to differentiate)
         self.windows[name].activateWindow()  # Give window focus (without this the window might appear but not be ready to receive input)
 
-    # Function on what to do if/when a window is closed (we'll add separate logic in CloseEvents for each window)
+    # Function on what to do if/when a window is closed
     def window_closed(self, window_class):
         name = window_class.__name__        # Get the class name of the class passed in
         if name in self.windows:            # If that class name is in the controller windows array -->

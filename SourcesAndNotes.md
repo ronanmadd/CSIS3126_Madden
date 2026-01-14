@@ -2,7 +2,7 @@
 
 
 
-=============================================================================================================================================================
+================================================================================================================================================
 
 ## ***TO DO / REMINDERS:***
 
@@ -12,9 +12,13 @@
 
 \* Do PHP validation and SQL database, encryption of passwords
 
+\* Might wanna change the "validation passed!" thing in run_validators
+
+\* Taking break on line 140 of loginwindow, need to do the same thing essentially for register window
 
 
-=============================================================================================================================================================
+
+================================================================================================================================================
 
 
 
@@ -44,7 +48,7 @@ https://www.youtube.com/watch?v=pV8wRgHqmaQ **-->** **"Create A Login Form App C
 
 
 
-			**git init** --> initialize new Git repo locally
+				**git init** --> initialize new Git repo locally
 
 &nbsp;	
 
