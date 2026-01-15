@@ -139,7 +139,8 @@ class RegisterWindow(BaseWindow):
         else:
 
             self.status.setText("Validation passed!")
-            # self.send_register_request()
+            # self.send_register_request() --> if successful (user not in database yet for example)
+            # (CONT.) send user to login window, if not give error that user already registered
 
     # Function for opening login window
     def open_login_window(self):
