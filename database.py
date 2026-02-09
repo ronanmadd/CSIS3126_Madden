@@ -5,6 +5,8 @@ DATABASE_PATH = 'spectrasync_data.db'       # file extension is .db for sqlite u
 # Function returns connection and cursor to database
 def get_connection():
 
+    # try-except for if connection fails?
+
     connection = sqlite3.connect(DATABASE_PATH)
 
     cursor = connection.cursor()            # Cursor manages interactions with DB, serves as bridge between app and DB

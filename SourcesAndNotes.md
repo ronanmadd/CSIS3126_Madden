@@ -16,6 +16,8 @@
 
 \* Taking break on line 140 of loginwindow, need to do the same thing essentially for register window
 
+Try except for if connection fails in database.py get_connection() ?
+
 
 
 ================================================================================================================================================
@@ -33,6 +35,8 @@ https://doc.qt.io/qtforpython-6.5/index.html **--> Qt/PySide6 Documentation**
 https://stackoverflow.com/questions/1551605/how-to-set-applications-taskbar-icon-in-windows-7/1552105#1552105 **--> ctypes solution for setting taskbar icon**
 
 https://www.youtube.com/watch?v=pV8wRgHqmaQ **-->** **"Create A Login Form App Connected To A Database | PyQt6 Tutorial"**
+
+https://www.geeksforgeeks.org/python/python-sqlite/  --> SQLite Documentation
 
 
 

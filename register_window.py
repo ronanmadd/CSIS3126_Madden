@@ -7,12 +7,13 @@ from PySide6.QtGui import QPixmap
 
 import requests
 from validation import run_validators
+from auth_requests import send_register_request
 
 from base_window import BaseWindow
 from app_globals import APP_PNG_PATH
 
 class RegisterWindow(BaseWindow):
-    def __init__(self, controller=None): # Constructor for RegisterWindow class, self is instance being created
+    def __init__(self, controller=None): # Constructor for RegisterWindow class, self is instance being created ===============
                                          # (CONT.) controller=None means optionally pass in controller, if not defaults to None
 
         super().__init__(controller)        # Refers to parent class of RegisterWindow (BaseWindow)
@@ -110,6 +111,8 @@ class RegisterWindow(BaseWindow):
         loginLinkLabel = labels['loginLink']                                     # streamline variable
         loginLinkLabel.setTextInteractionFlags(Qt.TextBrowserInteraction)        # make it clickable
         loginLinkLabel.setOpenExternalLinks(False)                               # We want this to be false because we're handling it ourselves just opening another .py file
+                                                                                 # (CONT.) Important distinction: send_login_window points to the function, while
+                                                                                 # (CONT 2.) send_login_window() will return whatever the function returns
         loginLinkLabel.linkActivated.connect(self.open_login_window)             # on-click call method to open register window
         loginLinkLabel.setAlignment(Qt.AlignmentFlag.AlignCenter)                # Align Center
         loginLinkLabel.setStyleSheet("color: blue; text-decoration: underline;") # Make it look like a hyperlink
@@ -124,25 +127,33 @@ class RegisterWindow(BaseWindow):
         self.status.setStyleSheet('font-size: 15px; color: red;')
         mainLayout.addWidget(self.status)
 
-        # Adapter function called by register button to call validation function
+
+    # Adapter function called by register button to call validation function ==============================================
     def run_validation(self):
 
-        usernameEdit = self.lineEdits['Username'] # Had to get rid of the usernameEdit/passwordEdit variables in __init__ 
-        passwordEdit = self.lineEdits['Password'] # (CONT.) because already store the QLineEdit objects in self.lineEdits
+        username = self.lineEdits['Username'].text().strip() # Convert to text and strip for later
+        password = self.lineEdits['Password'].text().strip()
 
-        errors = run_validators(usernameEdit, passwordEdit) # Call function
+        errors = run_validators(username, password) # Call function
 
         if errors:
-            self.status.setText("\n".join(errors)) # Join errors if they exist with line break between
+            self.status.setText("\n".join(errors)) # Join errors if they exist, with line break between
             return
         
         else:
 
             self.status.setText("Validation passed!")
-            # self.send_register_request() --> if successful (user not in database yet for example)
-            # (CONT.) send user to login window, if not give error that user already registered
+            error = send_register_request(username, password)  # Send register request to database
 
-    # Function for opening login window
+            if error:                                               # If there's an error, it will be caught and displayed (code after won't run)
+                self.status.setText(error)
+                return
+            
+            self.status.setText("Account created!")                 # If successful, tell user account created and redirect to login window
+            self.open_login_window()
+
+
+    # Function for opening login window ===================================================================================
     def open_login_window(self):
         
         from login_window import LoginWindow
