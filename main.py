@@ -1,21 +1,25 @@
-from controller import Controller
 from PySide6.QtWidgets import QApplication
+from controller import Controller
+from app_init import init_app
+from login_window import LoginWindow
 import sys
 
-app = QApplication(sys.argv)
-controller = Controller() # Create controller
+def main():
+    app = QApplication([])
+    init_app()
 
-user_logged_in = False  # PLACEHOLDER VALUE
+    controller = Controller()
 
-from login_window import LoginWindow
-# from dashboard_window import DashboardWindow
+    user_logged_in = False  # PLACEHOLDER VALUE, if false send to LoginWindow, if true send to DashboardWindow
 
-if user_logged_in:
-    first_window = DashboardWindow
-else: 
-    first_window = LoginWindow
+    if user_logged_in:
+        first_window = DashboardWindow
+    else: 
+        first_window = LoginWindow
 
-controller.show_window(first_window)
+    controller.show_window(first_window)
 
-sys.exit(app.exec())
+    sys.exit(app.exec())
 
+if __name__ == "__main__":
+    main()

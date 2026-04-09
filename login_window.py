@@ -7,8 +7,10 @@ from PySide6.QtGui import QPixmap
 
 import requests
 from validation import run_validators
+from auth_requests import send_login_request
 
 from base_window import BaseWindow
+from dashboard_window import DashboardWindow
 from app_globals import APP_PNG_PATH
 
 class LoginWindow(BaseWindow):
@@ -60,10 +62,6 @@ class LoginWindow(BaseWindow):
         gridLayout = QGridLayout()
         gridLayout.setVerticalSpacing(15) # Spacing between rows
         mainLayout.addLayout(gridLayout)
-
-        # If we addStretch at the BOTTOM of our layout, it pushes other widgets away and fills the vertical space
-        # (CONT.) so the title and form don't float in the middle vertically when the window is taller
-        mainLayout.addStretch()
 
         # Initialize username and password labels, add them to array
         labels['Username'] = QLabel('Username:')
@@ -124,22 +122,58 @@ class LoginWindow(BaseWindow):
         self.status.setStyleSheet('font-size: 15px; color: red;')
         mainLayout.addWidget(self.status)
 
+        self.status.setVisible(False)   # Hide error label initially so layout starts compact
+
+        # If we addStretch at the BOTTOM of our layout, it pushes other widgets away and fills the vertical space
+        # (CONT.) so the title and form don't float in the middle vertically when the window is taller
+        mainLayout.addStretch()
+
+    def adjust_height_only(self):                  # Had to create this because it was adjusting horizontally, only wanted vertically
+
+        current_width = self.width()               # Keep whatever width it currently has
+        self.adjustSize()                          # Let Qt compute the new best size (may change width + height)
+        self.resize(current_width, self.height())  # Restore width, keep new height
+
     # Adapter function called by login button to call validation function
     def run_validation(self):
 
-        usernameEdit = self.lineEdits['Username'] # Had to get rid of the usernameEdit/passwordEdit variables in __init__ 
-        passwordEdit = self.lineEdits['Password'] # (CONT.) because already store the QLineEdit objects in self.lineEdits
+        username = self.lineEdits['Username'].text().strip() # Had to get rid of the usernameEdit/passwordEdit variables in __init__ 
+        password = self.lineEdits['Password'].text().strip() # (CONT.) because already store the QLineEdit objects in self.lineEdits
 
-        errors = run_validators(usernameEdit, passwordEdit) # Call function
+        errors = run_validators(username, password) # Call function
 
         if errors:
-            self.status.setText("\n".join(errors)) # Join errors if they exist with line break between
+            self.status.setVisible(True)                                # Show error label when there are validation errors
+            self.status.setStyleSheet('font-size: 15px; color: red;')   # Set error text to red in case it needs to be
+            self.status.setText("\n".join(errors))                      # Join errors if they exist with line break in between
+            self.adjust_height_only()                                   # Resize window to fit new error text height
             return
         
         else:
+            self.status.clear()                          # Remove previous error text
+            self.status.setVisible(False)                # Hide error label to collapse its space
+            self.adjust_height_only()                    # Shrink window back to ideal size
 
-            self.status.setText("Validation passed!")
-            # self.send_login_request()
+            # self.status.setText("Validation passed!")    # Debugging Success message
+
+            error = send_login_request(username, password)  # Send login request to database
+
+            if error:                                    # If there's an error with register request, it will be caught and displayed (code after won't run)
+
+                self.status.setVisible(True)                                # Show error label when there are request errors
+                self.status.setStyleSheet('font-size: 15px; color: red;')   # Set error text to red in case it needs to be
+                self.status.setText(error)                                  # Display errors
+                self.adjust_height_only()                                   # Resize window to fit new error text height
+
+                return
+
+            # Login successful
+            if self.controller:
+                self.controller.current_user = username                 # Save logged in user in sesson
+
+                self.controller.show_window(DashboardWindow)            # Open dashboard window
+
+            self.close()                                                # Close login window
         
     # Function for opening register window
     def open_register_window(self):

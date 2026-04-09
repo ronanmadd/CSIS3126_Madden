@@ -7,8 +7,8 @@ def run_validators(username, password):
 
     # if (self.__class__.__name__)
     # Get input values
-    username = username.text().strip() # Need to use .strip() in case user adds spaces
-    password = password.text().strip()
+    username = (username or "").strip() # Need to use .strip() in case user adds spaces
+    password = (password or "").strip()
 
     # Check if username is blank, if not, continue checks: ==========================================
     if username:

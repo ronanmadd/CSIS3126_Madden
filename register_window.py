@@ -127,6 +127,18 @@ class RegisterWindow(BaseWindow):
         self.status.setStyleSheet('font-size: 15px; color: red;')
         mainLayout.addWidget(self.status)
 
+        self.status.setVisible(False)   # Hide error label initally so layout starts compact
+
+        # If we addStretch at the BOTTOM of our layout, it pushes other widgets away and fills the vertical space
+        # (CONT.) so the title and form don't float in the middle vertically when the window is taller
+        mainLayout.addStretch()
+
+    def adjust_height_only(self):                  # Had to create this because it was adjusting horizontally, only wanted vertically
+
+        current_width = self.width()               # Keep whatever width it currently has
+        self.adjustSize()                          # Let Qt compute the new best size (may change width + height)
+        self.resize(current_width, self.height())  # Restore width, keep new height
+
 
     # Adapter function called by register button to call validation function ==============================================
     def run_validation(self):
@@ -136,21 +148,39 @@ class RegisterWindow(BaseWindow):
 
         errors = run_validators(username, password) # Call function
 
-        if errors:
-            self.status.setText("\n".join(errors)) # Join errors if they exist, with line break between
+        if errors:                                              
+            self.status.setVisible(True)                                # Show error label when there are validation errors
+            self.status.setStyleSheet('font-size: 15px; color: red;')   # Set error text to red in case it needs to be
+            self.status.setText("\n".join(errors))                      # Join errors if they exist with line break in between
+            self.adjust_height_only()                                   # Resize window to fit new error text height
             return
         
         else:
+            
+            self.status.clear()                          # Remove previous error text
+            self.status.setVisible(False)                # Hide error label to collapse its space
+            self.adjust_height_only()                    # Shrink window back to ideal size
 
-            self.status.setText("Validation passed!")
+            # self.status.setText("Validation passed!")    # Debugging success message
+
             error = send_register_request(username, password)  # Send register request to database
 
-            if error:                                               # If there's an error, it will be caught and displayed (code after won't run)
-                self.status.setText(error)
+            if error:                                    # If there's an error with register request, it will be caught and displayed (code after won't run)
+
+                self.status.setVisible(True)                                # Show error label when there are request errors
+                self.status.setStyleSheet('font-size: 15px; color: red;')   # Set error text to red in case it needs to be
+                self.status.setText(error)                                  # Display errors
+                self.adjust_height_only()                                   # Resize window to fit new error text height
+
                 return
             
-            self.status.setText("Account created!")                 # If successful, tell user account created and redirect to login window
-            self.open_login_window()
+            # Login success
+            self.status.setVisible(True)                                # Show status text
+            self.status.setStyleSheet("font-size: 15px; color: green")  # Make status text green for success
+            self.status.setText("Registration successful!")             # Change status text to success message
+            self.adjust_height_only()                                   # Resize window to fit new error text height
+
+            self.open_login_window()                                    # Direct user to login window after successful registration
 
 
     # Function for opening login window ===================================================================================

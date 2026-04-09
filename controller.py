@@ -3,7 +3,8 @@ from PySide6.QtWidgets import QApplication
 
 class Controller:
     def __init__(self):
-        self.windows = {} # Array to store references to open windows dynamically
+        self.windows = {}           # Array to store references to open windows dynamically
+        self.current_user = None    # For session to store logged in user
 
     # Function to show a window of the given class
     def show_window(self, window_class): # window_class is a stand-in for any class of window so it's more dynamic and not as hardcoded
@@ -26,3 +27,25 @@ class Controller:
         name = window_class.__name__        # Get the class name of the class passed in
         if name in self.windows:            # If that class name is in the controller windows array -->
             self.windows[name] = None       # (CONT.) "Remove" it from the array of active windows
+
+    # Logout to clear session, close all windows, return user to LoginWindow
+    def logout(self):
+
+        self.current_user = None    # Get rid of stored logged in user for session
+
+        # Close all windows
+        for name, window in list(self.windows.items()): # self.windows.items returns something like ("LoginWindow", <LoginWindow object>))
+                                                        # where name = "LoginWindow", and window = <LoginWindow object>
+
+            if window is not None:
+                try:
+                    window.close()
+                except Exception:
+                    pass
+
+                self.windows[name] = None
+
+        # Bring back to login window
+
+        from login_window import LoginWindow
+        self.show_window(LoginWindow)
