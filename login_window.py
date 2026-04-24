@@ -1,13 +1,14 @@
 import sys
 import os
 import time
-from PySide6.QtWidgets import QApplication, QWidget, QLineEdit, QPushButton, QLabel, QGridLayout, QVBoxLayout, QSizePolicy
+from PySide6.QtWidgets import QApplication, QWidget, QLineEdit, QPushButton, QLabel, QGridLayout, QVBoxLayout, QSizePolicy, QCheckBox
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QPixmap
 
 import requests
 from validation import run_validators
 from auth_requests import send_login_request
+from database import get_user_id, get_user_settings, save_user_settings, clear_remembered_users
 
 from base_window import BaseWindow
 from dashboard_window import DashboardWindow
@@ -95,11 +96,14 @@ class LoginWindow(BaseWindow):
         gridLayout.addWidget(passwordLabel, 1, 0, 1, 1)
         gridLayout.addWidget(self.lineEdits['Password'], 1, 1, 1, 3) # Set column span to 3 to lengthen
 
+        self.remember_me_checkbox = QCheckBox("Remember Me")  # add checkbox so the user can choose to stay logged in
+        gridLayout.addWidget(self.remember_me_checkbox, 2, 1, 1, 1)  # add checkbox under the password field
+
         # Add a login button with fixed size policy so it doesn't stretch with the page
         button_login = QPushButton('&Login')
         button_login.setFixedWidth(120)
         button_login.setSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed)
-        gridLayout.addWidget(button_login, 2, 3, 1, 1)
+        gridLayout.addWidget(button_login, 3, 3, 1, 1)
 
         button_login.clicked.connect(self.run_validation) # When button clicked, run validation function
 
@@ -171,6 +175,26 @@ class LoginWindow(BaseWindow):
             if self.controller:
                 self.controller.current_user = username                 # Save logged in user in sesson
 
+                user_id = get_user_id(username)  # gets the numeric id for the logged-in user
+        
+                if user_id is not None:
+                    existing_settings = get_user_settings(user_id)  # loads user's existing settings so it doesn't overwrite other values
+
+                    if self.remember_me_checkbox.isChecked():
+                        remember_value = 1
+
+                    else:
+                        remember_value = 0  # turns the checkbox into value for database with checked = 1, unchecked = 0
+
+                    clear_remembered_users()  # clears remember session for everyone else so only one user is remembered at a time
+
+                    save_user_settings(  # saves the same settings row but updates the remember session value for this user
+                        user_id,
+                        existing_settings["default_mode"],
+                        existing_settings["default_brightness"],
+                        remember_value
+                    )
+
                 self.controller.show_window(DashboardWindow)            # Open dashboard window
 
             self.close()                                                # Close login window
@@ -184,4 +208,3 @@ class LoginWindow(BaseWindow):
         # Every window should get a controller when it's created, so this "if self.controller" check is kind of bullshit but just to be safe
         if self.controller:
             self.controller.show_window(RegisterWindow)
-            from register_window import RegisterWindow

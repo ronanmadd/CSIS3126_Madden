@@ -1,6 +1,6 @@
 import sqlite3
 from password_tools import hash_password, verify_password
-from database import get_connection, close_connection
+from database import get_connection, close_connection, create_default_settings
 
 # Function to add user into SQL database
 # Will return string if there's an error, None if success
@@ -14,7 +14,11 @@ def send_register_request(username, password):
 
         cursor.execute("INSERT INTO users (username, password_hash) VALUES (?, ?)", (username, password_hash)) # ? ? are placeholder values and we specify after
 
+        user_id = cursor.lastrowid                  # Gets the id of the user just inserted
+
         connection.commit()                         # Commit change
+
+        create_default_settings(user_id)            # Creates matching default row in user_settings for this new user
 
         return None     # Success there was no error to catch
     

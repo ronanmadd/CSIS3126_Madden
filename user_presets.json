@@ -1,1 +1,24 @@
-[]
+[
+    {
+        "name": "Solid Red",
+        "mode": "Solid",
+        "zone_count": 8,
+        "brightness": 255,
+        "speed": 50,
+        "smoothing": 50,
+        "primary_color": "#ff0004",
+        "secondary_color": "#ffffff",
+        "notes": ""
+    },
+    {
+        "name": "test",
+        "mode": "Rainbow",
+        "zone_count": 8,
+        "brightness": 128,
+        "speed": 100,
+        "smoothing": 0,
+        "primary_color": "#b6ff2f",
+        "secondary_color": "#ff0000",
+        "notes": ""
+    }
+]
